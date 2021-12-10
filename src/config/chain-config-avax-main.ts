@@ -7,11 +7,6 @@ export const ChainConfigAvaxMain: ChainConfig = {
     symbol: "AVAX",
     explorerUrl: "https://cchain.explorer.avax.network",
     contracts: {
-        CoinFlip: {
-            address: "0x",
-            tracker: "0x",
-            abi: ABIs.CoinFlipGame
-        },
         PenguinRandomizer: {
             address: "0x",
             abi: ABIs.PenguinRandomizer
