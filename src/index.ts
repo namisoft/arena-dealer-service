@@ -78,5 +78,5 @@ server.on('error', (e: Error) => {
 });
 
 server.on('listening', () => {
-    console.log(`HTTP server started on port ${AppConfig.HttpPort} on env ${process.env.NODE_ENV || 'dev'}`);
+    //console.log(`HTTP server started on port ${AppConfig.HttpPort} on env ${process.env.NODE_ENV || 'dev'}`);
 });
