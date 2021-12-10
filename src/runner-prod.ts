@@ -8,15 +8,22 @@ const fs = require('fs-extra');
 const readline = require('readline');
 
 @singleton()
-export class RunnerProd implements ServiceRunner{
+export class RunnerProd implements ServiceRunner {
     constructor(private dealerService: DealerService) {
     }
 
-    run(){
-        // read json keystore file from commandline
+    run() {
+        // firstly, read private key from commandline
+        const privateKey = argv['pk'];
+        if (privateKey) {
+            // start bot
+            this._startBot(privateKey);
+            return;
+        }
+        // otherwise, read json keystore file from commandline
         const jksFile = argv['jks'];
         if (!jksFile) {
-            console.error("Unspecified keystore file");
+            console.error("Private key or Keystore file required");
             process.exit(1);
         }
         const keystore = fs.readJSONSync(jksFile);
@@ -31,17 +38,14 @@ export class RunnerProd implements ServiceRunner{
         const self = this;
 
         // let user enter the password of keystore file
-        rl.question('Keystore password: ', function(password) {
+        rl.question('Keystore password: ', function (password) {
             rl.close();
             try {
                 const web3: Web3 = container.resolve("Web3");
                 const decryptedKey = web3.eth.accounts.decrypt(keystore, password);
                 // start bot
-                self.dealerService.setWorkingBot(decryptedKey.privateKey, 1000000);
-                self.dealerService.runCommitWorker();
-                self.dealerService.runRevealWorker();
-                self.dealerService.scanRandomizerEvents();
-            }catch (e){
+                self._startBot(decryptedKey.privateKey);
+            } catch (e) {
                 console.error(`\n${e.toString()}`);
                 process.exit(1);
             }
@@ -55,7 +59,19 @@ export class RunnerProd implements ServiceRunner{
         };
     }
 
-    stop(){
+    stop() {
 
+    }
+
+    private _startBot(privateKey: string) {
+        try {
+            this.dealerService.setWorkingBot(privateKey, 1000000);
+            this.dealerService.runCommitWorker();
+            this.dealerService.runRevealWorker();
+            this.dealerService.scanRandomizerEvents();
+        } catch (e) {
+            console.error(`Cannot start bot: ${e.toString()}`);
+            process.exit(1);
+        }
     }
 }
